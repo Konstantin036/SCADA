@@ -1,0 +1,73 @@
+﻿<Window x:Class="ScadaWPF.Views.AddWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add Tag / Alarm" Height="450" Width="400"
+        WindowStartupLocation="CenterScreen">
+
+    <StackPanel Margin="15">
+        <Label Content="Type:"/>
+        <ComboBox Name="cmbType" SelectionChanged="cmbType_SelectionChanged">
+            <ComboBoxItem>AI</ComboBoxItem>
+            <ComboBoxItem>AO</ComboBoxItem>
+            <ComboBoxItem>DI</ComboBoxItem>
+            <ComboBoxItem>DO</ComboBoxItem>
+            <ComboBoxItem>Alarm</ComboBoxItem>
+        </ComboBox>
+
+        <Label Content="Tag Name:"/>
+        <TextBox Name="txtTagName"/>
+
+        <Label Content="Description:"/>
+        <TextBox Name="txtDescription"/>
+
+        <Label Content="I/O Address:"/>
+        <TextBox Name="txtIOAddress"/>
+
+        <!-- Input only -->
+        <StackPanel Name="pnlInput">
+            <Label Content="Scan Time (ms):"/>
+            <TextBox Name="txtScanTime"/>
+        </StackPanel>
+
+        <!-- Analog only -->
+        <StackPanel Name="pnlAnalog">
+            <Label Content="Low Limit:"/>
+            <TextBox Name="txtLowLimit"/>
+            <Label Content="High Limit:"/>
+            <TextBox Name="txtHighLimit"/>
+            <Label Content="Units:"/>
+            <TextBox Name="txtUnits"/>
+        </StackPanel>
+
+        <!-- AI only -->
+        <StackPanel Name="pnlAI">
+            <Label Content="Deadband:"/>
+            <TextBox Name="txtDeadband"/>
+            <Label Content="Hysteresis:"/>
+            <TextBox Name="txtHysteresis"/>
+        </StackPanel>
+
+        <!-- Output only -->
+        <StackPanel Name="pnlOutput">
+            <Label Content="Initial Value:"/>
+            <TextBox Name="txtInitialValue"/>
+        </StackPanel>
+
+        <!-- Alarm only -->
+        <StackPanel Name="pnlAlarm">
+            <Label Content="AI Tag Name:"/>
+            <ComboBox Name="cmbAlarmTag"/>
+            <Label Content="Limit:"/>
+            <TextBox Name="txtAlarmLimit"/>
+            <Label Content="Type:"/>
+            <ComboBox Name="cmbAlarmType">
+                <ComboBoxItem>High</ComboBoxItem>
+                <ComboBoxItem>Low</ComboBoxItem>
+            </ComboBox>
+            <Label Content="Message:"/>
+            <TextBox Name="txtAlarmMessage"/>
+        </StackPanel>
+
+        <Button Content="Add" Width="100" Margin="0,15,0,0" Click="btnAdd_Click"/>
+    </StackPanel>
+</Window>

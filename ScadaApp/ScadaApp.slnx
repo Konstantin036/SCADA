@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="DataConcentrator/DataConcentrator.csproj" />
+  <Project Path="PLCSimulator/PLCSimulator.csproj" />
+  <Project Path="ScadaWPF/ScadaWPF.csproj" />
+</Solution>

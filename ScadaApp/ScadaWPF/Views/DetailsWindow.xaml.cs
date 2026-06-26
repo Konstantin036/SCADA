@@ -1,0 +1,42 @@
+﻿using DataConcentrator.Models;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace ScadaWPF.Views
+{
+    public partial class DetailsWindow : Window
+    {
+        private AnalogInput _tag;
+        private ObservableCollection<Alarm> _alarms;
+
+        public DetailsWindow(AnalogInput tag)
+        {
+            InitializeComponent();
+            _tag = tag;
+            txtTagInfo.Text = $"{tag.TagName} | {tag.Description} | " +
+                              $"Current: {tag.CurrentValue:F2} {tag.Units}";
+
+            _alarms = new ObservableCollection<Alarm>(tag.Alarms);
+            dgAlarms.ItemsSource = _alarms;
+        }
+
+        private void btnRemoveAlarm_Click(object sender, RoutedEventArgs e)
+        {
+            var alarm = (sender as Button)?.DataContext as Alarm;
+            if (alarm == null) return;
+
+            using (var ctx = new DataConcentrator.Database.ScadaContext())
+            {
+                var dbAlarm = ctx.Alarms.Find(alarm.Id);
+                if (dbAlarm != null)
+                {
+                    ctx.Alarms.Remove(dbAlarm);
+                    ctx.SaveChanges();
+                }
+            }
+            _tag.Alarms.Remove(alarm);
+            _alarms.Remove(alarm);
+        }
+    }
+}

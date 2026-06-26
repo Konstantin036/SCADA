@@ -1,0 +1,75 @@
+﻿<Window x:Class="ScadaWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SCADA Application" Height="600" Width="1000"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="150"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
+            <Button Name="btnAdd" Content="Add Tag/Alarm" Width="120" Margin="5"
+                    Click="btnAdd_Click"/>
+            <Button Name="btnReport" Content="Report" Width="80" Margin="5"
+                    Click="btnReport_Click"/>
+        </StackPanel>
+
+        <!-- Tags lista -->
+        <DataGrid Grid.Row="1" Name="dgTags" Margin="10"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Tag Name" Binding="{Binding TagName}" Width="120"/>
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="60"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="150"/>
+                <DataGridTextColumn Header="I/O Address" Binding="{Binding IOAddress}" Width="100"/>
+                <DataGridTextColumn Header="Current Value" Binding="{Binding CurrentValue}" Width="100"/>
+                <DataGridTemplateColumn Header="Scan" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsScanning, Mode=OneWay}"
+                                      Click="chkScan_Click"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Actions" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Details" Width="60" Margin="2"
+                                        Click="btnDetails_Click"/>
+                                <Button Content="Remove" Width="60" Margin="2"
+                                        Click="btnRemove_Click"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Alarm panel -->
+        <GroupBox Grid.Row="2" Header="Active Alarms" Margin="10">
+            <DataGrid Name="dgAlarms" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Tag" Binding="{Binding TagName}" Width="120"/>
+                    <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="200"/>
+                    <DataGridTextColumn Header="Time" Binding="{Binding Timestamp}" Width="150"/>
+                    <DataGridTextColumn Header="State" Binding="{Binding State}" Width="100"/>
+                    <DataGridTemplateColumn Header="Action" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Acknowledge" Click="btnAcknowledge_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+    </Grid>
+</Window>
