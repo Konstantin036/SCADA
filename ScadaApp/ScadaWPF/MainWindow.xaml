@@ -8,7 +8,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="200"/>
+            <RowDefinition Height="250"/>
         </Grid.RowDefinitions>
 
         <!-- Toolbar -->
@@ -29,7 +29,7 @@
                 <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="60"/>
                 <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="150"/>
                 <DataGridTextColumn Header="I/O Address" Binding="{Binding IOAddress}" Width="100"/>
-                <DataGridTextColumn Header="Current Value" Binding="{Binding CurrentValue}" Width="100"/>
+                <DataGridTextColumn Header="Current Value" Binding="{Binding CurrentValue, StringFormat=F2}" Width="100"/>
                 <DataGridTemplateColumn Header="Scan" Width="80">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -56,12 +56,27 @@
         <!-- Alarm panel -->
         <GroupBox Grid.Row="2" Header="Active Alarms" Margin="10">
             <DataGrid Name="dgAlarms" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding State}" Value="Active">
+                                <Setter Property="Background" Value="#FFCCCC"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding State}" Value="Acknowledged">
+                                <Setter Property="Background" Value="#FFFFCC"/>
+                            </DataTrigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#FFFFCC"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Tag" Binding="{Binding TagName}" Width="120"/>
                     <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="200"/>
                     <DataGridTextColumn Header="Time" Binding="{Binding Timestamp}" Width="150"/>
                     <DataGridTextColumn Header="State" Binding="{Binding State}" Width="100"/>
-                    <DataGridTemplateColumn Header="Action" Width="100">
+                    <DataGridTemplateColumn Header="Action" Width="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button Content="Acknowledge" Click="btnAcknowledge_Click"/>

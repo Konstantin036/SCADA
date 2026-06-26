@@ -20,20 +20,14 @@ namespace ScadaWPF
 
         public MainWindow()
         {
-            try
-            {
-                InitializeComponent();
-            }
+            try { InitializeComponent(); }
             catch (System.Exception ex)
             {
                 MessageBox.Show($"InitializeComponent greška: {ex.Message}");
                 throw;
             }
 
-            try
-            {
-                _dc = DataConcentrator.Core.DataConcentrator.Instance;
-            }
+            try { _dc = DataConcentrator.Core.DataConcentrator.Instance; }
             catch (System.Exception ex)
             {
                 MessageBox.Show($"DataConcentrator greška: {ex.Message}");
@@ -49,19 +43,28 @@ namespace ScadaWPF
                 dgAlarms.ItemsSource = _alarms;
 
                 _dc.AlarmRaised += OnAlarmRaised;
+                using (var ctx = new DataConcentrator.Database.ScadaContext())
+                {
+                    var activeAlarms = ctx.ActivatedAlarms
+                        .Where(a => a.State == AlarmState.Active)
+                        .ToList();
+                    foreach (var alarm in activeAlarms)
+                        _alarms.Add(alarm);
+                }
                 ApplyRolePermissions();
 
                 _inactivityTimer = new System.Windows.Threading.DispatcherTimer();
                 _inactivityTimer.Interval = System.TimeSpan.FromMinutes(5);
                 _inactivityTimer.Tick += OnInactivityTimeout;
                 _inactivityTimer.Start();
+
+                this.MouseMove += (s, e) => ResetTimer();
+                this.KeyDown += (s, e) => ResetTimer();
+
                 var refreshTimer = new System.Windows.Threading.DispatcherTimer();
                 refreshTimer.Interval = System.TimeSpan.FromSeconds(1);
                 refreshTimer.Tick += (s, e) => dgTags.Items.Refresh();
                 refreshTimer.Start();
-
-                this.MouseMove += (s, e) => ResetTimer();
-                this.KeyDown += (s, e) => ResetTimer();
 
                 Logger.Log("APP_START", "SCADA application started");
             }
@@ -176,6 +179,7 @@ namespace ScadaWPF
                     ctx.SaveChanges();
                 }
             }
+            dgAlarms.SelectedItem = null;
             dgAlarms.Items.Refresh();
             Logger.Log("ALARM_ACKNOWLEDGED", $"AlarmId: {alarm.Id}, Tag: {alarm.TagName}");
         }

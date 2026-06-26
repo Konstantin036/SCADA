@@ -168,6 +168,13 @@ namespace DataConcentrator.Core
             {
                 if (_analogInputs.ContainsKey(tagName))
                 {
+                    // Obrisi alarme i aktivirane alarme
+                    var alarms = ctx.Alarms.Where(a => a.TagName == tagName).ToList();
+                    ctx.Alarms.RemoveRange(alarms);
+
+                    var activatedAlarms = ctx.ActivatedAlarms.Where(a => a.TagName == tagName).ToList();
+                    ctx.ActivatedAlarms.RemoveRange(activatedAlarms);
+
                     ctx.AnalogInputs.Remove(ctx.AnalogInputs.Find(tagName));
                     _analogInputs.Remove(tagName);
                 }
@@ -178,6 +185,9 @@ namespace DataConcentrator.Core
                 }
                 else if (_digitalInputs.ContainsKey(tagName))
                 {
+                    var activatedAlarms = ctx.ActivatedAlarms.Where(a => a.TagName == tagName).ToList();
+                    ctx.ActivatedAlarms.RemoveRange(activatedAlarms);
+
                     ctx.DigitalInputs.Remove(ctx.DigitalInputs.Find(tagName));
                     _digitalInputs.Remove(tagName);
                 }
