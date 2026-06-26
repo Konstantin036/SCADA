@@ -19,9 +19,11 @@ namespace DataConcentrator.Core
         private Dictionary<string, DigitalOutput> _digitalOutputs;
 
         public event Action<int> AlarmRaised;
+        private SynchronizationContext _syncContext;
 
         private DataConcentrator()
         {
+            _syncContext = SynchronizationContext.Current;
             _analogInputs = new Dictionary<string, AnalogInput>();
             _digitalInputs = new Dictionary<string, DigitalInput>();
             _analogOutputs = new Dictionary<string, AnalogOutput>();
@@ -46,21 +48,33 @@ namespace DataConcentrator.Core
 
         private void LoadFromDatabase()
         {
-            using (var ctx = new ScadaContext())
+            try
             {
-                foreach (var tag in ctx.AnalogInputs.ToList())
+                using (var ctx = new ScadaContext())
                 {
-                    tag.Alarms = ctx.Alarms
-                        .Where(a => a.TagName == tag.TagName)
-                        .ToList();
-                    _analogInputs[tag.TagName] = tag;
+                    foreach (var tag in ctx.AnalogInputs.ToList())
+                    {
+                        tag.Alarms = ctx.Alarms
+                            .Where(a => a.TagName == tag.TagName)
+                            .ToList();
+                        _analogInputs[tag.TagName] = tag;
+                    }
+                    foreach (var tag in ctx.DigitalInputs.ToList())
+                        _digitalInputs[tag.TagName] = tag;
+                    foreach (var tag in ctx.AnalogOutputs.ToList())
+                        _analogOutputs[tag.TagName] = tag;
+                    foreach (var tag in ctx.DigitalOutputs.ToList())
+                        _digitalOutputs[tag.TagName] = tag;
+                    foreach (var tag in _analogInputs.Values)
+                        PLCSimulator.PLCSimulator.Instance.GetValue(tag.IOAddress);
+
+                    foreach (var tag in _digitalInputs.Values)
+                        PLCSimulator.PLCSimulator.Instance.GetValue(tag.IOAddress);
                 }
-                foreach (var tag in ctx.DigitalInputs.ToList())
-                    _digitalInputs[tag.TagName] = tag;
-                foreach (var tag in ctx.AnalogOutputs.ToList())
-                    _analogOutputs[tag.TagName] = tag;
-                foreach (var tag in ctx.DigitalOutputs.ToList())
-                    _digitalOutputs[tag.TagName] = tag;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"DB greška: {ex.Message}", ex);
             }
         }
 
@@ -77,6 +91,8 @@ namespace DataConcentrator.Core
                 if (diff < tag.Deadband) return;
 
                 tag.CurrentValue = value;
+                _syncContext?.Post(_ => { }, null);
+
                 CheckAlarms(tag);
             }
         }
@@ -152,6 +168,13 @@ namespace DataConcentrator.Core
             {
                 if (_analogInputs.ContainsKey(tagName))
                 {
+                    // Obrisi alarme i aktivirane alarme
+                    var alarms = ctx.Alarms.Where(a => a.TagName == tagName).ToList();
+                    ctx.Alarms.RemoveRange(alarms);
+
+                    var activatedAlarms = ctx.ActivatedAlarms.Where(a => a.TagName == tagName).ToList();
+                    ctx.ActivatedAlarms.RemoveRange(activatedAlarms);
+
                     ctx.AnalogInputs.Remove(ctx.AnalogInputs.Find(tagName));
                     _analogInputs.Remove(tagName);
                 }
@@ -162,6 +185,9 @@ namespace DataConcentrator.Core
                 }
                 else if (_digitalInputs.ContainsKey(tagName))
                 {
+                    var activatedAlarms = ctx.ActivatedAlarms.Where(a => a.TagName == tagName).ToList();
+                    ctx.ActivatedAlarms.RemoveRange(activatedAlarms);
+
                     ctx.DigitalInputs.Remove(ctx.DigitalInputs.Find(tagName));
                     _digitalInputs.Remove(tagName);
                 }

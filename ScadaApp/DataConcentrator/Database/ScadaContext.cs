@@ -13,6 +13,7 @@ namespace DataConcentrator.Database
         public DbSet<DigitalOutput> DigitalOutputs { get; set; }
         public DbSet<Alarm> Alarms { get; set; }
         public DbSet<ActivatedAlarm> ActivatedAlarms { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

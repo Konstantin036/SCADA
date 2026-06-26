@@ -1,0 +1,38 @@
+﻿<Window x:Class="ScadaWPF.Views.RegisterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Register" Height="450" Width="350"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <StackPanel Margin="30">
+        <TextBlock Text="Registracija" FontSize="18"
+                   FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+        <Label Content="Username:"/>
+        <TextBox Name="txtUsername" Margin="0,0,0,10"/>
+
+        <Label Content="Password:"/>
+        <PasswordBox Name="txtPassword" Margin="0,0,0,5"/>
+
+        <TextBlock Text="Min 15 karaktera, 1 veliko, 1 malo, 1 specijalni znak"
+                   FontSize="10" Foreground="Gray" Margin="0,0,0,10"/>
+
+        <Label Content="Potvrdi Password:"/>
+        <PasswordBox Name="txtConfirmPassword" Margin="0,0,0,10"/>
+
+        <Label Content="Uloga:"/>
+        <ComboBox Name="cmbRole" Margin="0,0,0,20">
+            <ComboBoxItem>Admin</ComboBoxItem>
+            <ComboBoxItem>Operator</ComboBoxItem>
+            <ComboBoxItem>Student</ComboBoxItem>
+            <ComboBoxItem>Teacher</ComboBoxItem>
+        </ComboBox>
+
+        <Button Content="Registruj se" Height="35" Click="btnRegister_Click"/>
+
+        <TextBlock Name="txtError" Foreground="Red"
+                   HorizontalAlignment="Center" Margin="0,10,0,0"
+                   TextWrapping="Wrap"/>
+    </StackPanel>
+</Window>
