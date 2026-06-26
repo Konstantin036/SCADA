@@ -8,7 +8,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="150"/>
+            <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
 
         <!-- Toolbar -->
