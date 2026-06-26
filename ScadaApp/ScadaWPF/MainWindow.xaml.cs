@@ -1,5 +1,6 @@
 ﻿using DataConcentrator.Core;
 using DataConcentrator.Models;
+using DataConcentrator.Services;
 using ScadaWPF.Helpers;
 using ScadaWPF.Views;
 using System.Collections.ObjectModel;
@@ -7,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace ScadaWPF
 {
@@ -16,19 +16,84 @@ namespace ScadaWPF
         private ObservableCollection<Tag> _tags;
         private ObservableCollection<ActivatedAlarm> _alarms;
         private DataConcentrator.Core.DataConcentrator _dc;
+        private System.Windows.Threading.DispatcherTimer _inactivityTimer;
 
         public MainWindow()
         {
-            InitializeComponent();
-            _dc = DataConcentrator.Core.DataConcentrator.Instance;
-            _tags = new ObservableCollection<Tag>(_dc.GetAllTags());
-            _alarms = new ObservableCollection<ActivatedAlarm>();
+            try
+            {
+                InitializeComponent();
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"InitializeComponent greška: {ex.Message}");
+                throw;
+            }
 
-            dgTags.ItemsSource = _tags;
-            dgAlarms.ItemsSource = _alarms;
+            try
+            {
+                _dc = DataConcentrator.Core.DataConcentrator.Instance;
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"DataConcentrator greška: {ex.Message}");
+                throw;
+            }
 
-            _dc.AlarmRaised += OnAlarmRaised;
-            Logger.Log("APP_START", "SCADA application started");
+            try
+            {
+                _tags = new ObservableCollection<Tag>(_dc.GetAllTags());
+                _alarms = new ObservableCollection<ActivatedAlarm>();
+
+                dgTags.ItemsSource = _tags;
+                dgAlarms.ItemsSource = _alarms;
+
+                _dc.AlarmRaised += OnAlarmRaised;
+                ApplyRolePermissions();
+
+                _inactivityTimer = new System.Windows.Threading.DispatcherTimer();
+                _inactivityTimer.Interval = System.TimeSpan.FromMinutes(5);
+                _inactivityTimer.Tick += OnInactivityTimeout;
+                _inactivityTimer.Start();
+                var refreshTimer = new System.Windows.Threading.DispatcherTimer();
+                refreshTimer.Interval = System.TimeSpan.FromSeconds(1);
+                refreshTimer.Tick += (s, e) => dgTags.Items.Refresh();
+                refreshTimer.Start();
+
+                this.MouseMove += (s, e) => ResetTimer();
+                this.KeyDown += (s, e) => ResetTimer();
+
+                Logger.Log("APP_START", "SCADA application started");
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Init greška: {ex.Message}\n\n{ex.InnerException?.Message}");
+                throw;
+            }
+        }
+
+        private void ResetTimer()
+        {
+            if (UserService.Instance.IsAdmin())
+            {
+                _inactivityTimer.Stop();
+                _inactivityTimer.Start();
+            }
+        }
+
+        private void OnInactivityTimeout(object sender, System.EventArgs e)
+        {
+            if (!UserService.Instance.IsAdmin()) return;
+
+            _inactivityTimer.Stop();
+            UserService.Instance.Logout();
+            MessageBox.Show("Sesija istekla zbog neaktivnosti.");
+
+            var login = new LoginWindow();
+            if (login.ShowDialog() == true)
+                ApplyRolePermissions();
+            else
+                Application.Current.Shutdown();
         }
 
         private void OnAlarmRaised(int alarmId)
@@ -131,6 +196,15 @@ namespace ScadaWPF
                 MessageBox.Show("Report generated: report.txt");
                 Logger.Log("REPORT_GENERATED");
             }
+        }
+
+        private void ApplyRolePermissions()
+        {
+            bool isAdmin = UserService.Instance.IsAdmin();
+            btnAdd.IsEnabled = isAdmin;
+
+            var user = UserService.Instance.CurrentUser;
+            Title = $"SCADA Application — {user.Username} ({user.Role})";
         }
     }
 }
