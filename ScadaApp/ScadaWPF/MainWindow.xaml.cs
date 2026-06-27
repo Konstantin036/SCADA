@@ -129,7 +129,14 @@ namespace ScadaWPF
             {
                 _dc.RemoveTag(tag.TagName);
                 _tags.Remove(tag);
+
+                // Obrisi alarme obrisanog taga iz UI liste
+                var alarmsToRemove = _alarms.Where(a => a.TagName == tag.TagName).ToList();
+                foreach (var alarm in alarmsToRemove)
+                    _alarms.Remove(alarm);
+
                 Logger.Log("TAG_REMOVED", $"Tag: {tag.TagName}");
+                dgTags.SelectedItem = null;
             }
         }
 
@@ -141,7 +148,14 @@ namespace ScadaWPF
                 MessageBox.Show("Details available only for Analog Input tags.");
                 return;
             }
+
             var detailsWindow = new DetailsWindow(tag);
+            detailsWindow.AlarmRemoved += (alarmId) =>
+            {
+                var activatedAlarms = _alarms.Where(a => a.AlarmId == alarmId).ToList();
+                foreach (var aa in activatedAlarms)
+                    _alarms.Remove(aa);
+            };
             detailsWindow.ShowDialog();
         }
 

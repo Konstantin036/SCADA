@@ -11,6 +11,7 @@ namespace ScadaWPF.Views
     {
         private AnalogInput _tag;
         private ObservableCollection<Alarm> _alarms;
+        public event Action<int> AlarmRemoved;
 
         public DetailsWindow(AnalogInput tag)
         {
@@ -31,6 +32,7 @@ namespace ScadaWPF.Views
         private void btnRemoveAlarm_Click(object sender, RoutedEventArgs e)
         {
             var alarm = (sender as Button)?.DataContext as Alarm;
+            AlarmRemoved?.Invoke(alarm.Id);
             if (alarm == null) return;
 
             using (var ctx = new DataConcentrator.Database.ScadaContext())
