@@ -90,6 +90,7 @@ namespace DataConcentrator.Core
                 if (diff < tag.Deadband) return;
 
                 tag.CurrentValue = value;
+                tag.CurrentValue = Math.Max(tag.LowLimit, Math.Min(tag.HighLimit, value));
                 _syncContext?.Post(_ => { }, null);
 
                 CheckAlarms(tag);
