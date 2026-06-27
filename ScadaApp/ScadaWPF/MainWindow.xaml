@@ -39,6 +39,8 @@
                     </Style>
                 </Button.Style>
             </Button>
+            <Button Name="btnLogout" Content="Logout" Width="80" Margin="5"
+        Click="btnLogout_Click"/>
         </StackPanel>
 
         <!-- Tags lista -->

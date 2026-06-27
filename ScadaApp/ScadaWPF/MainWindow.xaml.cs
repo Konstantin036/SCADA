@@ -208,6 +208,18 @@ namespace ScadaWPF
             }
         }
 
+        private void btnLogout_Click(object sender, RoutedEventArgs e)
+        {
+            UserService.Instance.Logout();
+            _inactivityTimer.Stop();
+
+            var login = new LoginWindow();
+            if (login.ShowDialog() == true)
+                ApplyRolePermissions();
+            else
+                Application.Current.Shutdown();
+        }
+
         private void ApplyRolePermissions()
         {
             _viewModel.Refresh();
