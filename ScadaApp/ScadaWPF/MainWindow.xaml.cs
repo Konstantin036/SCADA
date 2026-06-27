@@ -55,11 +55,6 @@ namespace ScadaWPF
             this.MouseMove += (s, e) => ResetTimer();
             this.KeyDown += (s, e) => ResetTimer();
 
-            var refreshTimer = new System.Windows.Threading.DispatcherTimer();
-            refreshTimer.Interval = System.TimeSpan.FromSeconds(1);
-            refreshTimer.Tick += (s, e) => dgTags.Items.Refresh();
-            refreshTimer.Start();
-
             Logger.Log("APP_START", "SCADA application started");
         }
 
