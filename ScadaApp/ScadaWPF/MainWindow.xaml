@@ -15,10 +15,30 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
             <Button Name="btnAdd" Content="Add Tag/Alarm" Width="120" Margin="5"
                     Click="btnAdd_Click"
-                    IsEnabled="{Binding IsAdmin}"/>
+                    IsEnabled="{Binding IsAdmin}">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="ToolTip" Value="Samo Admin može dodavati tagove"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button Name="btnReport" Content="Report" Width="80" Margin="5"
                     Click="btnReport_Click"
-                    IsEnabled="{Binding IsAdmin}"/>
+                    IsEnabled="{Binding IsAdmin}">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="ToolTip" Value="Samo Admin može generisati izveštaj"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </StackPanel>
 
         <!-- Tags lista -->
@@ -37,7 +57,17 @@
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsScanning, Mode=OneWay}"
                                       IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
-                                      Click="chkScan_Click"/>
+                                      Click="chkScan_Click">
+                                <CheckBox.Style>
+                                    <Style TargetType="CheckBox">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="ToolTip" Value="Samo Admin može menjati scan"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </CheckBox.Style>
+                            </CheckBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -49,7 +79,17 @@
                                         Click="btnDetails_Click"/>
                                 <Button Content="Remove" Width="60" Margin="2"
                                         IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Click="btnRemove_Click"/>
+                                        Click="btnRemove_Click">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="ToolTip" Value="Samo Admin može brisati tagove"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -107,7 +147,17 @@
                             <DataTemplate>
                                 <Button Content="Acknowledge"
                                         IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Click="btnAcknowledge_Click"/>
+                                        Click="btnAcknowledge_Click">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="ToolTip" Value="Samo Admin može acknowledge-ovati alarme"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
