@@ -198,7 +198,13 @@ namespace ScadaWPF
 
             var login = new LoginWindow();
             if (login.ShowDialog() == true)
-                ApplyRolePermissions();
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this.Show();
+                    ApplyRolePermissions();
+                });
+            }
             else
                 Application.Current.Shutdown();
         }
