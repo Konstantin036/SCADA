@@ -2,6 +2,7 @@
 using DataConcentrator.Models;
 using DataConcentrator.Services;
 using ScadaWPF.Helpers;
+using ScadaWPF.ViewModels;
 using ScadaWPF.Views;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -17,62 +18,44 @@ namespace ScadaWPF
         private ObservableCollection<ActivatedAlarm> _alarms;
         private DataConcentrator.Core.DataConcentrator _dc;
         private System.Windows.Threading.DispatcherTimer _inactivityTimer;
+        private MainViewModel _viewModel;
 
         public MainWindow()
         {
-            try { InitializeComponent(); }
-            catch (System.Exception ex)
+            InitializeComponent();
+
+            _viewModel = new MainViewModel();
+            this.DataContext = _viewModel;
+
+            _dc = DataConcentrator.Core.DataConcentrator.Instance;
+
+            _tags = new ObservableCollection<Tag>(_dc.GetAllTags());
+            _alarms = new ObservableCollection<ActivatedAlarm>();
+
+            dgTags.ItemsSource = _tags;
+            dgAlarms.ItemsSource = _alarms;
+
+            using (var ctx = new DataConcentrator.Database.ScadaContext())
             {
-                MessageBox.Show($"InitializeComponent greška: {ex.Message}");
-                throw;
+                var activeAlarms = ctx.ActivatedAlarms
+                    .Where(a => a.State == AlarmState.Active)
+                    .ToList();
+                foreach (var alarm in activeAlarms)
+                    _alarms.Add(alarm);
             }
 
-            try { _dc = DataConcentrator.Core.DataConcentrator.Instance; }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show($"DataConcentrator greška: {ex.Message}");
-                throw;
-            }
+            _dc.AlarmRaised += OnAlarmRaised;
+            ApplyRolePermissions();
 
-            try
-            {
-                _tags = new ObservableCollection<Tag>(_dc.GetAllTags());
-                _alarms = new ObservableCollection<ActivatedAlarm>();
+            _inactivityTimer = new System.Windows.Threading.DispatcherTimer();
+            _inactivityTimer.Interval = System.TimeSpan.FromMinutes(5);
+            _inactivityTimer.Tick += OnInactivityTimeout;
+            _inactivityTimer.Start();
 
-                dgTags.ItemsSource = _tags;
-                dgAlarms.ItemsSource = _alarms;
+            this.MouseMove += (s, e) => ResetTimer();
+            this.KeyDown += (s, e) => ResetTimer();
 
-                _dc.AlarmRaised += OnAlarmRaised;
-                using (var ctx = new DataConcentrator.Database.ScadaContext())
-                {
-                    var activeAlarms = ctx.ActivatedAlarms
-                        .Where(a => a.State == AlarmState.Active)
-                        .ToList();
-                    foreach (var alarm in activeAlarms)
-                        _alarms.Add(alarm);
-                }
-                ApplyRolePermissions();
-
-                _inactivityTimer = new System.Windows.Threading.DispatcherTimer();
-                _inactivityTimer.Interval = System.TimeSpan.FromMinutes(5);
-                _inactivityTimer.Tick += OnInactivityTimeout;
-                _inactivityTimer.Start();
-
-                this.MouseMove += (s, e) => ResetTimer();
-                this.KeyDown += (s, e) => ResetTimer();
-
-                var refreshTimer = new System.Windows.Threading.DispatcherTimer();
-                refreshTimer.Interval = System.TimeSpan.FromSeconds(1);
-                refreshTimer.Tick += (s, e) => dgTags.Items.Refresh();
-                refreshTimer.Start();
-
-                Logger.Log("APP_START", "SCADA application started");
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show($"Init greška: {ex.Message}\n\n{ex.InnerException?.Message}");
-                throw;
-            }
+            Logger.Log("APP_START", "SCADA application started");
         }
 
         private void ResetTimer()
@@ -90,11 +73,19 @@ namespace ScadaWPF
 
             _inactivityTimer.Stop();
             UserService.Instance.Logout();
+
+            this.Hide();
             MessageBox.Show("Sesija istekla zbog neaktivnosti.");
 
             var login = new LoginWindow();
             if (login.ShowDialog() == true)
-                ApplyRolePermissions();
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this.Show();
+                    ApplyRolePermissions();
+                });
+            }
             else
                 Application.Current.Shutdown();
         }
@@ -188,27 +179,53 @@ namespace ScadaWPF
         {
             using (var ctx = new DataConcentrator.Database.ScadaContext())
             {
-                var lines = ctx.AnalogInputs.ToList()
-                    .Where(ai => {
-                        double mid = (ai.HighLimit + ai.LowLimit) / 2;
-                        return ai.CurrentValue >= mid - 5 && ai.CurrentValue <= mid + 5;
-                    })
-                    .Select(ai => $"{ai.TagName} | {ai.CurrentValue:F2} | " +
-                                  $"Mid: {(ai.HighLimit + ai.LowLimit) / 2:F2}");
+                var history = ctx.TagHistories.OrderBy(h => h.Timestamp).ToList();
 
-                File.WriteAllLines("report.txt", lines);
+                if (!history.Any())
+                {
+                    MessageBox.Show("Nema podataka za report.");
+                    return;
+                }
+
+                var lines = history.Select(h =>
+                    $"[{h.Timestamp:yyyy-MM-dd HH:mm:ss}] {h.TagName} | {h.Value:F2}");
+
+                File.AppendAllLines("report.txt", lines);
+
+                ctx.TagHistories.RemoveRange(history);
+                ctx.SaveChanges();
+
                 MessageBox.Show("Report generated: report.txt");
                 Logger.Log("REPORT_GENERATED");
             }
         }
 
+        private void btnLogout_Click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
+            UserService.Instance.Logout();
+            _inactivityTimer.Stop();
+
+            var login = new LoginWindow();
+            if (login.ShowDialog() == true)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this.Show();
+                    ApplyRolePermissions();
+                });
+            }
+            else
+                Application.Current.Shutdown();
+        }
+
         private void ApplyRolePermissions()
         {
-            bool isAdmin = UserService.Instance.IsAdmin();
-            btnAdd.IsEnabled = isAdmin;
-
+            _viewModel.Refresh();
             var user = UserService.Instance.CurrentUser;
             Title = $"SCADA Application — {user.Username} ({user.Role})";
+            dgTags.Items.Refresh();
+            dgAlarms.Items.Refresh();
         }
     }
 }

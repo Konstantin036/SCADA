@@ -1,4 +1,6 @@
 ﻿using DataConcentrator.Models;
+using DataConcentrator.Services;
+using ScadaWPF.ViewModels;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +15,11 @@ namespace ScadaWPF.Views
         public DetailsWindow(AnalogInput tag)
         {
             InitializeComponent();
+
+            var viewModel = new MainViewModel();
+            viewModel.Refresh();
+            this.DataContext = viewModel;
+
             _tag = tag;
             txtTagInfo.Text = $"{tag.TagName} | {tag.Description} | " +
                               $"Current: {tag.CurrentValue:F2} {tag.Units}";

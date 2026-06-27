@@ -4,9 +4,9 @@
         Title="SCADA Application" Height="600" Width="1000"
         WindowStartupLocation="CenterScreen">
 
-    <Grid>
+    <Grid Background="{StaticResource BackgroundDark}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="250"/>
         </Grid.RowDefinitions>
@@ -14,9 +14,17 @@
         <!-- Toolbar -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
             <Button Name="btnAdd" Content="Add Tag/Alarm" Width="120" Margin="5"
-                    Click="btnAdd_Click"/>
+                    Click="btnAdd_Click"
+                    IsEnabled="{Binding IsAdmin}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTip="Samo Admin može dodavati tagove"/>
             <Button Name="btnReport" Content="Report" Width="80" Margin="5"
-                    Click="btnReport_Click"/>
+                    Click="btnReport_Click"
+                    IsEnabled="{Binding IsAdmin}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTip="Samo Admin može generisati izveštaj"/>
+            <Button Name="btnLogout" Content="Logout" Width="80" Margin="5"
+                    Click="btnLogout_Click"/>
         </StackPanel>
 
         <!-- Tags lista -->
@@ -34,6 +42,9 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsScanning, Mode=OneWay}"
+                                      IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
+                                      ToolTipService.ShowOnDisabled="True"
+                                      ToolTip="Samo Admin može menjati scan"
                                       Click="chkScan_Click"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -45,6 +56,9 @@
                                 <Button Content="Details" Width="60" Margin="2"
                                         Click="btnDetails_Click"/>
                                 <Button Content="Remove" Width="60" Margin="2"
+                                        IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        ToolTipService.ShowOnDisabled="True"
+                                        ToolTip="Samo Admin može brisati tagove"
                                         Click="btnRemove_Click"/>
                             </StackPanel>
                         </DataTemplate>
@@ -56,18 +70,42 @@
         <!-- Alarm panel -->
         <GroupBox Grid.Row="2" Header="Active Alarms" Margin="10">
             <DataGrid Name="dgAlarms" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridCell">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding State}" Value="Active">
-                                <Setter Property="Background" Value="#FFCCCC"/>
+                                <Setter Property="Background" Value="#7A1A1A"/>
+                                <Setter Property="Foreground" Value="#FFAAAA"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding State}" Value="Acknowledged">
-                                <Setter Property="Background" Value="#FFFFCC"/>
+                                <Setter Property="Background" Value="#7A6A00"/>
+                                <Setter Property="Foreground" Value="#FFD700"/>
                             </DataTrigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#FFFFCC"/>
-                            </Trigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    <Condition Binding="{Binding State}" Value="Active"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Background" Value="#7A1A1A"/>
+                            </MultiDataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    <Condition Binding="{Binding State}" Value="Acknowledged"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Background" Value="#7A6A00"/>
+                            </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>
@@ -79,7 +117,11 @@
                     <DataGridTemplateColumn Header="Action" Width="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Acknowledge" Click="btnAcknowledge_Click"/>
+                                <Button Content="Acknowledge"
+                                        IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        ToolTipService.ShowOnDisabled="True"
+                                        ToolTip="Samo Admin može acknowledge-ovati alarme"
+                                        Click="btnAcknowledge_Click"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

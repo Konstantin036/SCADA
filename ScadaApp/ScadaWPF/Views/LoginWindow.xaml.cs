@@ -38,6 +38,9 @@ namespace ScadaWPF.Views
         {
             var registerWindow = new RegisterWindow();
             registerWindow.ShowDialog();
+
+            if (!string.IsNullOrEmpty(registerWindow.RegisteredUsername))
+                txtUsername.Text = registerWindow.RegisteredUsername;
         }
     }
 }

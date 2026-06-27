@@ -1,13 +1,16 @@
 ﻿<Window x:Class="ScadaWPF.Views.RegisterWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Register" Height="450" Width="350"
+        Title="Register" Height="500" Width="350"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        Background="{StaticResource BackgroundDark}">
 
     <StackPanel Margin="30">
         <TextBlock Text="Registracija" FontSize="18"
-                   FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+           FontWeight="Bold" HorizontalAlignment="Center"
+           Foreground="{StaticResource AccentBlue}"
+           Margin="0,0,0,20"/>
 
         <Label Content="Username:"/>
         <TextBox Name="txtUsername" Margin="0,0,0,10"/>

@@ -3,11 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SCADA Login" Height="450" Width="350"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        Background="{StaticResource BackgroundDark}">
 
     <StackPanel Margin="30">
-        <TextBlock Text="SCADA Application" FontSize="18" 
-                   FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+        <TextBlock Text="SCADA Application" FontSize="18"
+           FontWeight="Bold" HorizontalAlignment="Center"
+           Foreground="{StaticResource AccentBlue}"
+           Margin="0,0,0,20"/>
 
         <Label Content="Username:"/>
         <TextBox Name="txtUsername" Margin="0,0,0,10"/>
@@ -24,7 +27,8 @@
 
         <Separator Margin="0,20,0,10"/>
 
-        <TextBlock Text="New user?" HorizontalAlignment="Center"/>
+        <TextBlock Text="New user?" HorizontalAlignment="Center"
+           Foreground="{StaticResource TextSecondary}"/>
         <Button Content="Register" Margin="0,8,0,0"
                 Click="btnRegister_Click"/>
     </StackPanel>

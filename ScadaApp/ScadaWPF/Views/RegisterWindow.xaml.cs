@@ -49,12 +49,13 @@ namespace ScadaWPF.Views
             if (success)
             {
                 MessageBox.Show("Uspešna registracija!");
-                Close();
+                DialogResult = true;
             }
             else
             {
                 txtError.Text = "Username već postoji ili lozinka nije jedinstvena.";
             }
         }
+        public string RegisteredUsername { get; private set; }
     }
 }
