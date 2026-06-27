@@ -69,8 +69,8 @@
 
         <!-- Alarm panel -->
         <GroupBox Grid.Row="2" Header="Active Alarms" Margin="10">
-            <DataGrid Name="dgAlarms" AutoGenerateColumns="False" IsReadOnly="True">
-                <DataGrid.Resources>
+            <DataGrid Name="dgAlarms" AutoGenerateColumns="False" IsReadOnly="True" GotFocus="dgAlarms_GotFocus">
+                    <DataGrid.Resources>
                     <Style TargetType="DataGridCell">
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">

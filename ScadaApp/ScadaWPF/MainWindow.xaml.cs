@@ -227,5 +227,9 @@ namespace ScadaWPF
             dgTags.Items.Refresh();
             dgAlarms.Items.Refresh();
         }
+        private void dgAlarms_GotFocus(object sender, RoutedEventArgs e)
+        {
+            dgTags.SelectedItem = null;
+        }
     }
 }
