@@ -14,9 +14,11 @@
         <!-- Toolbar -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
             <Button Name="btnAdd" Content="Add Tag/Alarm" Width="120" Margin="5"
-                    Click="btnAdd_Click"/>
+                    Click="btnAdd_Click"
+                    IsEnabled="{Binding IsAdmin}"/>
             <Button Name="btnReport" Content="Report" Width="80" Margin="5"
-                    Click="btnReport_Click"/>
+                    Click="btnReport_Click"
+                    IsEnabled="{Binding IsAdmin}"/>
         </StackPanel>
 
         <!-- Tags lista -->
@@ -34,6 +36,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsScanning, Mode=OneWay}"
+                                      IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
                                       Click="chkScan_Click"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -45,6 +48,7 @@
                                 <Button Content="Details" Width="60" Margin="2"
                                         Click="btnDetails_Click"/>
                                 <Button Content="Remove" Width="60" Margin="2"
+                                        IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
                                         Click="btnRemove_Click"/>
                             </StackPanel>
                         </DataTemplate>
@@ -56,6 +60,17 @@
         <!-- Alarm panel -->
         <GroupBox Grid.Row="2" Header="Active Alarms" Margin="10">
             <DataGrid Name="dgAlarms" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridCell">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
@@ -65,9 +80,20 @@
                             <DataTrigger Binding="{Binding State}" Value="Acknowledged">
                                 <Setter Property="Background" Value="#FFFFCC"/>
                             </DataTrigger>
-                            <Trigger Property="IsSelected" Value="True">
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    <Condition Binding="{Binding State}" Value="Active"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Background" Value="#FFCCCC"/>
+                            </MultiDataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                    <Condition Binding="{Binding State}" Value="Acknowledged"/>
+                                </MultiDataTrigger.Conditions>
                                 <Setter Property="Background" Value="#FFFFCC"/>
-                            </Trigger>
+                            </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>
@@ -79,7 +105,9 @@
                     <DataGridTemplateColumn Header="Action" Width="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Acknowledge" Click="btnAcknowledge_Click"/>
+                                <Button Content="Acknowledge"
+                                        IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Click="btnAcknowledge_Click"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -2,6 +2,7 @@
 using DataConcentrator.Models;
 using DataConcentrator.Services;
 using ScadaWPF.Helpers;
+using ScadaWPF.ViewModels;
 using ScadaWPF.Views;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -17,6 +18,7 @@ namespace ScadaWPF
         private ObservableCollection<ActivatedAlarm> _alarms;
         private DataConcentrator.Core.DataConcentrator _dc;
         private System.Windows.Threading.DispatcherTimer _inactivityTimer;
+        private MainViewModel _viewModel;
 
         public MainWindow()
         {
@@ -26,6 +28,9 @@ namespace ScadaWPF
                 MessageBox.Show($"InitializeComponent greška: {ex.Message}");
                 throw;
             }
+
+            _viewModel = new MainViewModel();
+            this.DataContext = _viewModel;
 
             try { _dc = DataConcentrator.Core.DataConcentrator.Instance; }
             catch (System.Exception ex)
@@ -42,7 +47,6 @@ namespace ScadaWPF
                 dgTags.ItemsSource = _tags;
                 dgAlarms.ItemsSource = _alarms;
 
-                _dc.AlarmRaised += OnAlarmRaised;
                 using (var ctx = new DataConcentrator.Database.ScadaContext())
                 {
                     var activeAlarms = ctx.ActivatedAlarms
@@ -51,6 +55,8 @@ namespace ScadaWPF
                     foreach (var alarm in activeAlarms)
                         _alarms.Add(alarm);
                 }
+
+                _dc.AlarmRaised += OnAlarmRaised;
                 ApplyRolePermissions();
 
                 _inactivityTimer = new System.Windows.Threading.DispatcherTimer();
@@ -204,11 +210,11 @@ namespace ScadaWPF
 
         private void ApplyRolePermissions()
         {
-            bool isAdmin = UserService.Instance.IsAdmin();
-            btnAdd.IsEnabled = isAdmin;
-
+            _viewModel.Refresh();
             var user = UserService.Instance.CurrentUser;
             Title = $"SCADA Application — {user.Username} ({user.Role})";
+            dgTags.Items.Refresh();
+            dgAlarms.Items.Refresh();
         }
     }
 }

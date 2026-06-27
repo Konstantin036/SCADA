@@ -58,18 +58,17 @@ namespace DataConcentrator.Core
                             .Where(a => a.TagName == tag.TagName)
                             .ToList();
                         _analogInputs[tag.TagName] = tag;
+                        PLCSimulator.PLCSimulator.Instance.GetValue(tag.IOAddress);
                     }
                     foreach (var tag in ctx.DigitalInputs.ToList())
+                    {
                         _digitalInputs[tag.TagName] = tag;
+                        PLCSimulator.PLCSimulator.Instance.GetValue(tag.IOAddress);
+                    }
                     foreach (var tag in ctx.AnalogOutputs.ToList())
                         _analogOutputs[tag.TagName] = tag;
                     foreach (var tag in ctx.DigitalOutputs.ToList())
                         _digitalOutputs[tag.TagName] = tag;
-                    foreach (var tag in _analogInputs.Values)
-                        PLCSimulator.PLCSimulator.Instance.GetValue(tag.IOAddress);
-
-                    foreach (var tag in _digitalInputs.Values)
-                        PLCSimulator.PLCSimulator.Instance.GetValue(tag.IOAddress);
                 }
             }
             catch (Exception ex)
@@ -144,6 +143,7 @@ namespace DataConcentrator.Core
                     case AnalogInput ai:
                         ctx.AnalogInputs.Add(ai);
                         _analogInputs[ai.TagName] = ai;
+                        PLCSimulator.PLCSimulator.Instance.GetValue(ai.IOAddress);
                         break;
                     case AnalogOutput ao:
                         ctx.AnalogOutputs.Add(ao);
@@ -152,6 +152,7 @@ namespace DataConcentrator.Core
                     case DigitalInput di:
                         ctx.DigitalInputs.Add(di);
                         _digitalInputs[di.TagName] = di;
+                        PLCSimulator.PLCSimulator.Instance.GetValue(di.IOAddress);
                         break;
                     case DigitalOutput dout:
                         ctx.DigitalOutputs.Add(dout);
@@ -168,11 +169,12 @@ namespace DataConcentrator.Core
             {
                 if (_analogInputs.ContainsKey(tagName))
                 {
-                    // Obrisi alarme i aktivirane alarme
-                    var alarms = ctx.Alarms.Where(a => a.TagName == tagName).ToList();
+                    var alarms = ctx.Alarms
+                        .Where(a => a.TagName == tagName).ToList();
                     ctx.Alarms.RemoveRange(alarms);
 
-                    var activatedAlarms = ctx.ActivatedAlarms.Where(a => a.TagName == tagName).ToList();
+                    var activatedAlarms = ctx.ActivatedAlarms
+                        .Where(a => a.TagName == tagName).ToList();
                     ctx.ActivatedAlarms.RemoveRange(activatedAlarms);
 
                     ctx.AnalogInputs.Remove(ctx.AnalogInputs.Find(tagName));
@@ -185,7 +187,8 @@ namespace DataConcentrator.Core
                 }
                 else if (_digitalInputs.ContainsKey(tagName))
                 {
-                    var activatedAlarms = ctx.ActivatedAlarms.Where(a => a.TagName == tagName).ToList();
+                    var activatedAlarms = ctx.ActivatedAlarms
+                        .Where(a => a.TagName == tagName).ToList();
                     ctx.ActivatedAlarms.RemoveRange(activatedAlarms);
 
                     ctx.DigitalInputs.Remove(ctx.DigitalInputs.Find(tagName));

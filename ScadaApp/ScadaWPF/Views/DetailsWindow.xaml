@@ -10,12 +10,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Info -->
         <StackPanel Grid.Row="0" Margin="0,0,0,10">
             <TextBlock Name="txtTagInfo" FontWeight="Bold" FontSize="14"/>
         </StackPanel>
 
-        <!-- Alarmi -->
         <GroupBox Grid.Row="1" Header="Alarms">
             <DataGrid Name="dgAlarms" AutoGenerateColumns="False" IsReadOnly="True">
                 <DataGrid.Columns>
@@ -26,7 +24,9 @@
                     <DataGridTemplateColumn Header="Remove" Width="80">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="X" Click="btnRemoveAlarm_Click"/>
+                                <Button Content="X"
+                                        IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Click="btnRemoveAlarm_Click"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
