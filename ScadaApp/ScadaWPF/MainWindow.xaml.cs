@@ -22,63 +22,45 @@ namespace ScadaWPF
 
         public MainWindow()
         {
-            try { InitializeComponent(); }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show($"InitializeComponent greška: {ex.Message}");
-                throw;
-            }
+            InitializeComponent();
 
             _viewModel = new MainViewModel();
             this.DataContext = _viewModel;
 
-            try { _dc = DataConcentrator.Core.DataConcentrator.Instance; }
-            catch (System.Exception ex)
+            _dc = DataConcentrator.Core.DataConcentrator.Instance;
+
+            _tags = new ObservableCollection<Tag>(_dc.GetAllTags());
+            _alarms = new ObservableCollection<ActivatedAlarm>();
+
+            dgTags.ItemsSource = _tags;
+            dgAlarms.ItemsSource = _alarms;
+
+            using (var ctx = new DataConcentrator.Database.ScadaContext())
             {
-                MessageBox.Show($"DataConcentrator greška: {ex.Message}");
-                throw;
+                var activeAlarms = ctx.ActivatedAlarms
+                    .Where(a => a.State == AlarmState.Active)
+                    .ToList();
+                foreach (var alarm in activeAlarms)
+                    _alarms.Add(alarm);
             }
 
-            try
-            {
-                _tags = new ObservableCollection<Tag>(_dc.GetAllTags());
-                _alarms = new ObservableCollection<ActivatedAlarm>();
+            _dc.AlarmRaised += OnAlarmRaised;
+            ApplyRolePermissions();
 
-                dgTags.ItemsSource = _tags;
-                dgAlarms.ItemsSource = _alarms;
+            _inactivityTimer = new System.Windows.Threading.DispatcherTimer();
+            _inactivityTimer.Interval = System.TimeSpan.FromMinutes(5);
+            _inactivityTimer.Tick += OnInactivityTimeout;
+            _inactivityTimer.Start();
 
-                using (var ctx = new DataConcentrator.Database.ScadaContext())
-                {
-                    var activeAlarms = ctx.ActivatedAlarms
-                        .Where(a => a.State == AlarmState.Active)
-                        .ToList();
-                    foreach (var alarm in activeAlarms)
-                        _alarms.Add(alarm);
-                }
+            this.MouseMove += (s, e) => ResetTimer();
+            this.KeyDown += (s, e) => ResetTimer();
 
-                _dc.AlarmRaised += OnAlarmRaised;
-                ApplyRolePermissions();
+            var refreshTimer = new System.Windows.Threading.DispatcherTimer();
+            refreshTimer.Interval = System.TimeSpan.FromSeconds(1);
+            refreshTimer.Tick += (s, e) => dgTags.Items.Refresh();
+            refreshTimer.Start();
 
-                _inactivityTimer = new System.Windows.Threading.DispatcherTimer();
-                _inactivityTimer.Interval = System.TimeSpan.FromMinutes(5);
-                _inactivityTimer.Tick += OnInactivityTimeout;
-                _inactivityTimer.Start();
-
-                this.MouseMove += (s, e) => ResetTimer();
-                this.KeyDown += (s, e) => ResetTimer();
-
-                var refreshTimer = new System.Windows.Threading.DispatcherTimer();
-                refreshTimer.Interval = System.TimeSpan.FromSeconds(1);
-                refreshTimer.Tick += (s, e) => dgTags.Items.Refresh();
-                refreshTimer.Start();
-
-                Logger.Log("APP_START", "SCADA application started");
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show($"Init greška: {ex.Message}\n\n{ex.InnerException?.Message}");
-                throw;
-            }
+            Logger.Log("APP_START", "SCADA application started");
         }
 
         private void ResetTimer()
