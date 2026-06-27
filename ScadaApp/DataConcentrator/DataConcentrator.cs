@@ -270,6 +270,17 @@ namespace DataConcentrator.Core
                             ctx.Database.ExecuteSqlCommand(
                                 "UPDATE AnalogInputs SET CurrentValue = @p0 WHERE TagName = @p1",
                                 tag.CurrentValue, tag.TagName);
+
+                            double mid = (tag.HighLimit + tag.LowLimit) / 2;
+                            if (tag.CurrentValue >= mid - 5 && tag.CurrentValue <= mid + 5)
+                            {
+                                ctx.TagHistories.Add(new TagHistory
+                                {
+                                    TagName = tag.TagName,
+                                    Value = tag.CurrentValue,
+                                    Timestamp = DateTime.Now
+                                });
+                            }
                         }
                         foreach (var tag in _digitalInputs.Values)
                         {
@@ -277,6 +288,7 @@ namespace DataConcentrator.Core
                                 "UPDATE DigitalInputs SET CurrentValue = @p0 WHERE TagName = @p1",
                                 tag.CurrentValue ? 1 : 0, tag.TagName);
                         }
+                        ctx.SaveChanges();
                     }
                 }
             }

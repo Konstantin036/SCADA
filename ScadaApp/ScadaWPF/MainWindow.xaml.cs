@@ -179,19 +179,22 @@ namespace ScadaWPF
         {
             using (var ctx = new DataConcentrator.Database.ScadaContext())
             {
-                var allAI = ctx.AnalogInputs.ToList();
-                string debug = string.Join("\n", allAI.Select(ai =>
-                    $"{ai.TagName} | CV:{ai.CurrentValue} | Low:{ai.LowLimit} | High:{ai.HighLimit} | Mid:{(ai.HighLimit + ai.LowLimit) / 2}"));
-                MessageBox.Show($"AI tagovi u bazi:\n{debug}");
+                var history = ctx.TagHistories.OrderBy(h => h.Timestamp).ToList();
 
-                var lines = allAI
-                    .Where(ai => {
-                        double mid = (ai.HighLimit + ai.LowLimit) / 2;
-                        return ai.CurrentValue >= mid - 5 && ai.CurrentValue <= mid + 5;
-                    })
-                    .Select(ai => $"{ai.TagName} | {ai.CurrentValue:F2} | Mid: {(ai.HighLimit + ai.LowLimit) / 2:F2}");
+                if (!history.Any())
+                {
+                    MessageBox.Show("Nema podataka za report.");
+                    return;
+                }
 
-                File.WriteAllLines("report.txt", lines);
+                var lines = history.Select(h =>
+                    $"[{h.Timestamp:yyyy-MM-dd HH:mm:ss}] {h.TagName} | {h.Value:F2}");
+
+                File.AppendAllLines("report.txt", lines);
+
+                ctx.TagHistories.RemoveRange(history);
+                ctx.SaveChanges();
+
                 MessageBox.Show("Report generated: report.txt");
                 Logger.Log("REPORT_GENERATED");
             }
