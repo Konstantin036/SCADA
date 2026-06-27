@@ -16,14 +16,12 @@ namespace ScadaWPF.Views
             InitializeComponent();
             _dc = DataConcentrator.Core.DataConcentrator.Instance;
 
-            // Sakrij sve panele na startu
             pnlInput.Visibility = Visibility.Collapsed;
             pnlAnalog.Visibility = Visibility.Collapsed;
             pnlAI.Visibility = Visibility.Collapsed;
             pnlOutput.Visibility = Visibility.Collapsed;
             pnlAlarm.Visibility = Visibility.Collapsed;
 
-            // Popuni AI tagove za alarm combo
             var aiTags = _dc.GetAllTags()
                 .OfType<AnalogInput>()
                 .Select(t => t.TagName);
@@ -69,9 +67,76 @@ namespace ScadaWPF.Views
             }
         }
 
+        private bool ValidateTagFields(string selected)
+        {
+            if (string.IsNullOrWhiteSpace(txtTagName.Text))
+            {
+                MessageBox.Show("Tag Name ne sme biti prazan.");
+                return false;
+            }
+
+            if (_dc.GetAllTags().Any(t => t.TagName == txtTagName.Text))
+            {
+                MessageBox.Show($"Tag sa imenom '{txtTagName.Text}' već postoji.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtIOAddress.Text))
+            {
+                MessageBox.Show("I/O Address ne sme biti prazan.");
+                return false;
+            }
+
+            if (_dc.GetAllTags().Any(t => t.IOAddress == txtIOAddress.Text))
+            {
+                MessageBox.Show($"I/O Address '{txtIOAddress.Text}' već postoji.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateAlarmFields()
+        {
+            if (cmbAlarmTag.SelectedItem == null)
+            {
+                MessageBox.Show("Izaberi AI tag.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtAlarmLimit.Text))
+            {
+                MessageBox.Show("Limit ne sme biti prazan.");
+                return false;
+            }
+
+            if (cmbAlarmType.SelectedItem == null)
+            {
+                MessageBox.Show("Izaberi tip alarma.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtAlarmMessage.Text))
+            {
+                MessageBox.Show("Poruka ne sme biti prazna.");
+                return false;
+            }
+
+            return true;
+        }
+
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
             string selected = (cmbType.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+            if (selected == null)
+            {
+                MessageBox.Show("Izaberi tip.");
+                return;
+            }
+
+            if (selected != "Alarm" && !ValidateTagFields(selected))
+                return;
 
             try
             {
@@ -122,10 +187,8 @@ namespace ScadaWPF.Views
                         });
                         break;
                     case "Alarm":
+                        if (!ValidateAlarmFields()) return;
                         AddAlarm();
-                        return;
-                    default:
-                        MessageBox.Show("Izaberi tip.");
                         return;
                 }
                 DialogResult = true;
@@ -139,12 +202,6 @@ namespace ScadaWPF.Views
 
         private void AddAlarm()
         {
-            if (cmbAlarmTag.SelectedItem == null)
-            {
-                MessageBox.Show("Izaberi AI tag.");
-                return;
-            }
-
             string tagName = cmbAlarmTag.SelectedItem.ToString();
             string alarmTypeStr = (cmbAlarmType.SelectedItem as ComboBoxItem)?.Content.ToString();
 
@@ -161,7 +218,6 @@ namespace ScadaWPF.Views
                 ctx.Alarms.Add(alarm);
                 ctx.SaveChanges();
 
-                // Dodaj u in-memory tag
                 var aiTag = _dc.GetAnalogInput(tagName);
                 aiTag?.Alarms.Add(alarm);
             }

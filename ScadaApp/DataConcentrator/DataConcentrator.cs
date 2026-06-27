@@ -4,7 +4,6 @@ using PLCSimulator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace DataConcentrator.Core
 {
@@ -19,12 +18,10 @@ namespace DataConcentrator.Core
         private Dictionary<string, DigitalOutput> _digitalOutputs;
 
         public event Action<int> AlarmRaised;
-        private SynchronizationContext _syncContext;
         private Timer _saveTimer;
 
         private DataConcentrator()
         {
-            _syncContext = SynchronizationContext.Current;
             _analogInputs = new Dictionary<string, AnalogInput>();
             _digitalInputs = new Dictionary<string, DigitalInput>();
             _analogOutputs = new Dictionary<string, AnalogOutput>();
@@ -91,9 +88,7 @@ namespace DataConcentrator.Core
                 double diff = Math.Abs(value - tag.CurrentValue);
                 if (diff < tag.Deadband) return;
 
-                tag.CurrentValue = value;
                 tag.CurrentValue = Math.Max(tag.LowLimit, Math.Min(tag.HighLimit, value));
-                _syncContext?.Post(_ => { }, null);
 
                 CheckAlarms(tag);
             }
