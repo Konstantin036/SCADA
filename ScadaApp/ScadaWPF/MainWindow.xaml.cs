@@ -210,6 +210,7 @@ namespace ScadaWPF
 
         private void btnLogout_Click(object sender, RoutedEventArgs e)
         {
+            this.Hide();
             UserService.Instance.Logout();
             _inactivityTimer.Stop();
 
