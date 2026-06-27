@@ -179,13 +179,17 @@ namespace ScadaWPF
         {
             using (var ctx = new DataConcentrator.Database.ScadaContext())
             {
-                var lines = ctx.AnalogInputs.ToList()
+                var allAI = ctx.AnalogInputs.ToList();
+                string debug = string.Join("\n", allAI.Select(ai =>
+                    $"{ai.TagName} | CV:{ai.CurrentValue} | Low:{ai.LowLimit} | High:{ai.HighLimit} | Mid:{(ai.HighLimit + ai.LowLimit) / 2}"));
+                MessageBox.Show($"AI tagovi u bazi:\n{debug}");
+
+                var lines = allAI
                     .Where(ai => {
                         double mid = (ai.HighLimit + ai.LowLimit) / 2;
                         return ai.CurrentValue >= mid - 5 && ai.CurrentValue <= mid + 5;
                     })
-                    .Select(ai => $"{ai.TagName} | {ai.CurrentValue:F2} | " +
-                                  $"Mid: {(ai.HighLimit + ai.LowLimit) / 2:F2}");
+                    .Select(ai => $"{ai.TagName} | {ai.CurrentValue:F2} | Mid: {(ai.HighLimit + ai.LowLimit) / 2:F2}");
 
                 File.WriteAllLines("report.txt", lines);
                 MessageBox.Show("Report generated: report.txt");
