@@ -180,6 +180,7 @@ namespace ScadaWPF
             using (var ctx = new DataConcentrator.Database.ScadaContext())
             {
                 var history = ctx.TagHistories.OrderBy(h => h.Timestamp).ToList();
+                dgTags.SelectedItem = null;
 
                 if (!history.Any())
                 {
