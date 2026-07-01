@@ -58,6 +58,12 @@ namespace ScadaWPF.Views
                 Title = tag.Units
             });
 
+            // Grid
+            model.Axes[0].MajorGridlineStyle = LineStyle.Dot;
+            model.Axes[0].MajorGridlineColor = OxyColor.FromRgb(60, 60, 60);
+            model.Axes[1].MajorGridlineStyle = LineStyle.Dot;
+            model.Axes[1].MajorGridlineColor = OxyColor.FromRgb(60, 60, 60);
+
             // Linija vrednosti
             var series = new LineSeries
             {
