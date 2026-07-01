@@ -47,5 +47,16 @@ namespace ScadaWPF.Views
             _tag.Alarms.Remove(alarm);
             _alarms.Remove(alarm);
         }
+
+        private void btnEditAlarm_Click(object sender, RoutedEventArgs e)
+        {
+            var alarm = (sender as Button)?.DataContext as Alarm;
+            if (alarm == null) return;
+
+            var editWindow = new EditAlarmWindow(alarm);
+            if (editWindow.ShowDialog() == true)
+                dgAlarms.Items.Refresh();
+        }
+
     }
 }

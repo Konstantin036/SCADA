@@ -49,12 +49,17 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Actions" Width="200">
+                <DataGridTemplateColumn Header="Actions" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="Details" Width="60" Margin="2"
                                         Click="btnDetails_Click"/>
+                                <Button Content="Edit" Width="55" Margin="2"
+                                        IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        ToolTipService.ShowOnDisabled="True"
+                                        ToolTip="Samo Admin može editovati tagove"
+                                        Click="btnEdit_Click"/>
                                 <Button Content="History" Width="60" Margin="2"
                                         Click="btnHistory_Click"/>
                                 <Button Content="Remove" Width="60" Margin="2"

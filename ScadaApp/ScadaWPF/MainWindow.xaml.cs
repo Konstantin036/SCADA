@@ -267,5 +267,19 @@ namespace ScadaWPF
                 historyWindow.ShowDialog();
             }
         }
+
+        private void btnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            var tag = (sender as Button)?.DataContext as Tag;
+            if (tag == null) return;
+
+            var editWindow = new EditWindow(tag);
+            if (editWindow.ShowDialog() == true)
+            {
+                dgTags.Items.Refresh();
+                Logger.Log("TAG_EDITED", $"Tag: {tag.TagName}");
+            }
+            dgTags.SelectedItem = null;
+        }
     }
 }
