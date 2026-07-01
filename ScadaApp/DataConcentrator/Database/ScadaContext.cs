@@ -15,6 +15,7 @@ namespace DataConcentrator.Database
         public DbSet<ActivatedAlarm> ActivatedAlarms { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<TagHistory> TagHistories { get; set; }
+        public DbSet<TagValueHistory> TagValueHistories { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

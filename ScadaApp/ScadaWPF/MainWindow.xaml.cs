@@ -246,5 +246,26 @@ namespace ScadaWPF
         {
             dgTags.SelectedItem = null;
         }
+
+        private void btnHistory_Click(object sender, RoutedEventArgs e)
+        {
+            var tag = (sender as Button)?.DataContext as AnalogInput;
+            if (tag == null)
+            {
+                MessageBox.Show("History je dostupan samo za Analog Input tagove.");
+                return;
+            }
+
+            using (var ctx = new DataConcentrator.Database.ScadaContext())
+            {
+                var history = ctx.TagValueHistories
+                .Where(h => h.TagName == tag.TagName)
+                .OrderBy(h => h.Timestamp)
+                .ToList();
+
+                var historyWindow = new HistoryWindow(tag, history);
+                historyWindow.ShowDialog();
+            }
+        }
     }
 }

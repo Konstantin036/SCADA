@@ -49,12 +49,14 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Actions" Width="150">
+                <DataGridTemplateColumn Header="Actions" Width="200">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="Details" Width="60" Margin="2"
                                         Click="btnDetails_Click"/>
+                                <Button Content="History" Width="60" Margin="2"
+                                        Click="btnHistory_Click"/>
                                 <Button Content="Remove" Width="60" Margin="2"
                                         IsEnabled="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}}"
                                         ToolTipService.ShowOnDisabled="True"

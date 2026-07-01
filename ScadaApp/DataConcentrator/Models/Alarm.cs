@@ -27,4 +27,13 @@ namespace DataConcentrator.Models
         public DateTime Timestamp { get; set; }
         public AlarmState State { get; set; } = AlarmState.Active;
     }
+
+    public class TagValueHistory
+    {
+        [Key]
+        public int Id { get; set; }
+        public string TagName { get; set; }
+        public double Value { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
 }

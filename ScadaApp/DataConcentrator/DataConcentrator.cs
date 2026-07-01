@@ -266,6 +266,7 @@ namespace DataConcentrator.Core
                                 "UPDATE AnalogInputs SET CurrentValue = @p0 WHERE TagName = @p1",
                                 tag.CurrentValue, tag.TagName);
 
+                            // Za report — samo vrednosti u opsegu
                             double mid = (tag.HighLimit + tag.LowLimit) / 2;
                             if (tag.CurrentValue >= mid - 5 && tag.CurrentValue <= mid + 5)
                             {
@@ -276,6 +277,14 @@ namespace DataConcentrator.Core
                                     Timestamp = DateTime.Now
                                 });
                             }
+
+                            // Za grafik — sve vrednosti
+                            ctx.TagValueHistories.Add(new TagValueHistory
+                            {
+                                TagName = tag.TagName,
+                                Value = tag.CurrentValue,
+                                Timestamp = DateTime.Now
+                            });
                         }
                         foreach (var tag in _digitalInputs.Values)
                         {
